@@ -3,9 +3,17 @@ use std::time::Duration;
 
 use serde::Deserialize;
 
-/// Top-level configuration describing a single RTSP-to-HLS capture job.
+/// Top-level configuration describing one or more RTSP-to-HLS capture jobs.
 #[derive(Deserialize)]
 pub struct AppConfig {
+    /// Collection of recordings that should be executed by the application.
+    #[serde(default)]
+    pub recordings: Vec<RecordingConfig>,
+}
+
+/// Parameters for an individual RTSP recording job.
+#[derive(Deserialize)]
+pub struct RecordingConfig {
     /// Network location of the RTSP source, including credentials if required.
     pub rtsp_url: String,
     /// Optional wall-clock duration (seconds) to limit how long the recorder runs.
@@ -31,11 +39,13 @@ pub struct HlsConfig {
     pub segment_filename: Option<String>,
 }
 
-impl AppConfig {
+impl RecordingConfig {
+    /// Returns the optional duration limit as a `Duration`.
     pub fn duration(&self) -> Option<Duration> {
         self.duration_seconds.map(Duration::from_secs)
     }
 
+    /// Converts the configuration into an `HlsOutput` suitable for the recorder.
     pub fn hls_output(&self) -> crate::recorder::HlsOutput {
         crate::recorder::HlsOutput {
             playlist_path: PathBuf::from(&self.hls.playlist_path),
