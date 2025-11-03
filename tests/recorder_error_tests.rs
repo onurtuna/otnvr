@@ -1,4 +1,4 @@
-use std::io;
+use std::{error::Error, io};
 
 use ffmpeg_next::error::Error as FfmpegError;
 use otnvr::recorder::RecorderError;
