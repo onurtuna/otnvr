@@ -1,0 +1,62 @@
+use otnvr::config::AppConfig;
+use otnvr::recorder::RtspRecorder;
+use std::fs;
+
+fn main() {
+    let mut args = std::env::args();
+    let app = args.next().unwrap_or_else(|| "rtsp-recorder".to_string());
+
+    let config_path = match args.next() {
+        Some(path) => path,
+        None => {
+            print_usage(&app);
+            std::process::exit(1);
+        }
+    };
+
+    let config_contents = match fs::read_to_string(&config_path) {
+        Ok(contents) => contents,
+        Err(error) => {
+            eprintln!("Failed to read config file {config_path}: {error}");
+            std::process::exit(1);
+        }
+    };
+
+    // Parse the configuration JSON that drives the recorder session.
+    let config: AppConfig = match serde_json::from_str(&config_contents) {
+        Ok(config) => config,
+        Err(error) => {
+            eprintln!("Invalid config JSON: {error}");
+            std::process::exit(1);
+        }
+    };
+
+    let duration_limit = config.duration();
+    let hls_output = config.hls_output();
+    let duration_summary = duration_limit
+        .as_ref()
+        .map(|d| format!(" (captured for {} seconds)", d.as_secs()));
+
+    let recorder = match RtspRecorder::new() {
+        Ok(recorder) => recorder,
+        Err(error) => {
+            eprintln!("Failed to initialize FFmpeg recorder: {error}");
+            std::process::exit(1);
+        }
+    };
+
+    if let Err(error) = recorder.record(&config.rtsp_url, &hls_output, duration_limit) {
+        eprintln!("Failed to record RTSP stream: {error}");
+        std::process::exit(1);
+    }
+
+    println!(
+        "HLS playlist saved to {}{}",
+        hls_output.playlist_path.display(),
+        duration_summary.unwrap_or_default()
+    );
+}
+
+fn print_usage(app: &str) {
+    eprintln!("Usage: {app} <config-file>");
+}

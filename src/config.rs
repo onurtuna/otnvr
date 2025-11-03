@@ -1,0 +1,47 @@
+use std::path::PathBuf;
+use std::time::Duration;
+
+use serde::Deserialize;
+
+/// Top-level configuration describing a single RTSP-to-HLS capture job.
+#[derive(Deserialize)]
+pub struct AppConfig {
+    /// Network location of the RTSP source, including credentials if required.
+    pub rtsp_url: String,
+    /// Optional wall-clock duration (seconds) to limit how long the recorder runs.
+    #[serde(default)]
+    pub duration_seconds: Option<u64>,
+    /// Parameters that control details of the generated HLS output.
+    pub hls: HlsConfig,
+}
+
+/// Nested configuration block for HLS muxer options.
+#[derive(Deserialize)]
+pub struct HlsConfig {
+    /// Destination path for the `.m3u8` playlist; segment paths are derived from this.
+    pub playlist_path: String,
+    /// Optional segment duration, in seconds. The FFmpeg muxer rounds as needed.
+    #[serde(default)]
+    pub segment_duration_seconds: Option<u32>,
+    /// Optional clamp for how many segment URIs remain in the sliding playlist window.
+    #[serde(default)]
+    pub playlist_size: Option<u32>,
+    /// Optional custom segment filename pattern. Supports FFmpeg printf-style counters.
+    #[serde(default)]
+    pub segment_filename: Option<String>,
+}
+
+impl AppConfig {
+    pub fn duration(&self) -> Option<Duration> {
+        self.duration_seconds.map(Duration::from_secs)
+    }
+
+    pub fn hls_output(&self) -> crate::recorder::HlsOutput {
+        crate::recorder::HlsOutput {
+            playlist_path: PathBuf::from(&self.hls.playlist_path),
+            segment_duration: self.hls.segment_duration_seconds,
+            playlist_size: self.hls.playlist_size,
+            segment_filename: self.hls.segment_filename.clone(),
+        }
+    }
+}
