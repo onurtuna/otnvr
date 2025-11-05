@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use ffmpeg_next::{
@@ -278,6 +278,24 @@ fn encoder_options(codec: VideoCodec) -> Dictionary<'static> {
 
 pub fn derive_segment_template(hls_output: &HlsOutput) -> String {
     if let Some(template) = &hls_output.segment_filename {
+        if hls_output.video_codec == VideoCodec::H265 {
+            let original = PathBuf::from(template);
+            let requires_override = match original.extension().and_then(|ext| ext.to_str()) {
+                Some(ext) if ext.eq_ignore_ascii_case("m4s") => false,
+                _ => true,
+            };
+
+            if requires_override {
+                let mut adjusted = original.clone();
+                adjusted.set_extension("m4s");
+                let original_display = original.to_string_lossy();
+                let adjusted_display = adjusted.to_string_lossy().to_string();
+                eprintln!(
+                    "Warning: overriding segment filename extension from {original_display} to {adjusted_display} for H.265 output"
+                );
+                return adjusted_display;
+            }
+        }
         return template.clone();
     }
 

@@ -55,3 +55,14 @@ fn derive_segment_template_switches_extension_for_h265() {
 
     assert_eq!(template, "output/stream_%05d.m4s");
 }
+
+#[test]
+fn derive_segment_template_overrides_custom_extension_for_h265() {
+    let mut hls = base_hls_output();
+    hls.segment_filename = Some("custom/segment_%03d.ts".to_string());
+    hls.video_codec = VideoCodec::H265;
+
+    let template = derive_segment_template(&hls);
+
+    assert_eq!(template, "custom/segment_%03d.m4s");
+}
