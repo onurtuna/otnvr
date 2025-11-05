@@ -1,6 +1,6 @@
 # OtNvr
 
-OtNvr is a Rust command-line application that uses FFmpeg to capture one or more RTSP streams and remux them to HTTP Live Streaming (HLS) assets (an `.m3u8` playlist and `.ts` segments).
+OtNvr is a Rust command-line application that uses FFmpeg to capture one or more RTSP streams and remux them to HTTP Live Streaming (HLS) assets (an `.m3u8` playlist and `.ts` or `.m4s` segments).
 
 ## Features
 
