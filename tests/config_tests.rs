@@ -1,7 +1,9 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
-use otnvr::{AppConfig, HlsConfig, RecordingConfig};
+use serde_json::json;
+
+use otnvr::{AppConfig, HlsConfig, RecordingConfig, VideoCodec};
 
 fn build_config() -> AppConfig {
     AppConfig {
@@ -13,6 +15,7 @@ fn build_config() -> AppConfig {
                 segment_duration_seconds: Some(6),
                 playlist_size: Some(5),
                 segment_filename: Some("out/segments_%04d.ts".to_string()),
+                video_codec: VideoCodec::H264,
             },
         }],
     }
@@ -42,4 +45,24 @@ fn hls_output_translates_config_into_struct() {
         hls.segment_filename.as_deref(),
         Some("out/segments_%04d.ts")
     );
+    assert_eq!(hls.video_codec, VideoCodec::H264);
+}
+
+#[test]
+fn video_codec_defaults_to_h264() {
+    let config_json = json!({
+        "recordings": [
+            {
+                "rtsp_url": "rtsp://example.com/stream",
+                "hls": {
+                    "playlist_path": "out/stream.m3u8"
+                }
+            }
+        ]
+    });
+
+    let config: AppConfig = serde_json::from_value(config_json).expect("config json");
+    let recording = &config.recordings[0];
+
+    assert_eq!(recording.hls.video_codec, VideoCodec::H264);
 }

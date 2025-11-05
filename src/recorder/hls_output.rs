@@ -1,5 +1,24 @@
 use std::path::PathBuf;
 
+use serde::Deserialize;
+
+/// Supported video codecs for transcoding HLS output.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VideoCodec {
+    /// Encode video streams using the H.264 (AVC) codec.
+    H264,
+    /// Encode video streams using the H.265 (HEVC) codec.
+    H265,
+}
+
+impl VideoCodec {
+    /// Default codec when configuration does not specify one.
+    pub const fn default() -> Self {
+        VideoCodec::H264
+    }
+}
+
 /// Describes where and how the HLS playlist and transport stream segments should be written.
 #[derive(Debug, Clone)]
 pub struct HlsOutput {
@@ -11,4 +30,6 @@ pub struct HlsOutput {
     pub playlist_size: Option<u32>,
     /// Optional pattern for individual segment files. Defaults to `<playlist>_%05d.ts`.
     pub segment_filename: Option<String>,
+    /// Target codec for the encoded video elementary stream inside the HLS segments.
+    pub video_codec: VideoCodec,
 }

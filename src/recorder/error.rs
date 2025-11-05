@@ -3,6 +3,8 @@ use std::fmt;
 
 use ffmpeg_next::Error as FfmpegError;
 
+use super::VideoCodec;
+
 /// Errors that can surface while preparing or recording an RTSP stream to HLS.
 #[derive(Debug)]
 pub enum RecorderError {
@@ -14,6 +16,8 @@ pub enum RecorderError {
     InvalidStreamMapping(usize),
     /// I/O failures such as creating directories or writing playlist/segment files.
     Io(std::io::Error),
+    /// Requested video codec is unavailable or unsupported by the current FFmpeg build.
+    UnsupportedVideoCodec(VideoCodec),
 }
 
 impl fmt::Display for RecorderError {
@@ -27,6 +31,9 @@ impl fmt::Display for RecorderError {
                 write!(f, "invalid stream mapping for output stream {index}")
             }
             RecorderError::Io(err) => write!(f, "{err}"),
+            RecorderError::UnsupportedVideoCodec(codec) => {
+                write!(f, "unsupported video codec requested: {:?}", codec)
+            }
         }
     }
 }

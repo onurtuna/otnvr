@@ -3,6 +3,8 @@ use std::time::Duration;
 
 use serde::Deserialize;
 
+use crate::recorder::VideoCodec;
+
 /// Top-level configuration describing one or more RTSP-to-HLS capture jobs.
 #[derive(Deserialize)]
 pub struct AppConfig {
@@ -37,6 +39,9 @@ pub struct HlsConfig {
     /// Optional custom segment filename pattern. Supports FFmpeg printf-style counters.
     #[serde(default)]
     pub segment_filename: Option<String>,
+    /// Desired codec for the encoded video stream within the HLS segments.
+    #[serde(default = "default_video_codec")]
+    pub video_codec: VideoCodec,
 }
 
 impl RecordingConfig {
@@ -52,6 +57,11 @@ impl RecordingConfig {
             segment_duration: self.hls.segment_duration_seconds,
             playlist_size: self.hls.playlist_size,
             segment_filename: self.hls.segment_filename.clone(),
+            video_codec: self.hls.video_codec,
         }
     }
+}
+
+fn default_video_codec() -> VideoCodec {
+    VideoCodec::default()
 }

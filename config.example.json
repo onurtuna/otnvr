@@ -7,7 +7,8 @@
         "playlist_path": "output/camera-one/stream.m3u8",
         "segment_duration_seconds": 4,
         "playlist_size": 10,
-        "segment_filename": "output/camera-one/stream_%05d.ts"
+        "segment_filename": "output/camera-one/stream_%05d.ts",
+        "video_codec": "h264"
       }
     },
     {
@@ -15,7 +16,8 @@
       "hls": {
         "playlist_path": "output/camera-two/stream.m3u8",
         "segment_duration_seconds": 6,
-        "playlist_size": 5
+        "playlist_size": 5,
+        "video_codec": "h265"
       }
     }
   ]
