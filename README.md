@@ -1,3 +1,5 @@
+!Warning: This project is not a industry-ready implementation of an NVR. Real recorders use ring buffering system which is a complicated project. In this project, we simply remux RTSP to HLS using an ffmpeg wrapper for Rust. What you can learn are multimedia work using ffmpeg-next and Rust language. I'm planning to make additions to the project in time. Stay connected :)
+
 # OtNvr
 
 OtNvr is a Rust command-line application that uses FFmpeg to capture one or more RTSP streams and remux them to HTTP Live Streaming (HLS) assets (an `.m3u8` playlist and `.ts` or `.m4s` segments).
